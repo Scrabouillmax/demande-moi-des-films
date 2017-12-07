@@ -57,17 +57,41 @@ class Recommendation:
     # Display the recommendation for a user
     def make_recommendation(self, user):
         movie = choice(list(self.movies.values())).title
-
+        similarities = self.compute_all_similarities(user)
+        similarities = sorted(similarities, key=lambda tup: tup[1])
+        matched_user = similarities[0][0]
+        movie = matched_user.good_ratings
         return "Vos recommandations : " + ", ".join([movie])
 
     # Compute the similarity between two users
     @staticmethod
     def get_similarity(user_a, user_b):
-        return 1
+        compteur=0
+        acc=0
+        for movie in user_a.good_ratings:
+            if movie in user_b.good_ratings:
+                compteur+=1
+                acc+=1
+            elif movie in user_b.bad_ratings:
+                compteur-=1
+                acc+=1
+        for movie in user_a.bad_ratings:
+            if movie in user_b.good_ratings:
+                compteur-=1
+                acc+=1
+
+            elif movie in user_b.bad_ratings:
+                compteur+=1
+                acc+=1
+
+        return compteur/acc
 
     # Compute the similarity between a user and all the users in the data set
     def compute_all_similarities(self, user):
-        return []
+        similarities = []
+        for other_user in self.test_users:
+            similarities+=[(other_user, self.get_similarity(user, other_user))]
+        return similarities
 
     @staticmethod
     def get_best_movies_from_users(users):
@@ -79,8 +103,7 @@ class Recommendation:
 
     @staticmethod
     def get_user_norm(user):
-        return 1
-
+        return len(user.good_ratings) + len(user.bad_ratings)
     # Return a vector with the normalised ratings of a user
     @staticmethod
     def get_normalised_cluster_notations(user):

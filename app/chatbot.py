@@ -32,6 +32,8 @@ class Bot(object):
 
             message = self.ask_question(user)
             return intro + message
+    def make_recommendation(self, user):
+        return self.recommendation.make_recommendation(user)
 
     # Register a user if it does not exist and return it
     def register_user(self, sender):
